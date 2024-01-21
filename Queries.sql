@@ -21,19 +21,47 @@ ORDER BY obrot DESC;
 
 -- The most popular months to start the project, ordered by the number of projects:
 
-SELECT EXTRACT(MONTH FROM p.projekt_data_rozpoczecia) AS miesiac,
-	   COUNT(*) AS liczba_projektow
+SELECT 
+CASE EXTRACT(MONTH FROM p.projekt_data_rozpoczecia)
+        WHEN 1 THEN 'styczeń'
+        WHEN 2 THEN 'luty'
+        WHEN 3 THEN 'marzec'
+        WHEN 4 THEN 'kwiecień'
+        WHEN 5 THEN 'maj'
+        WHEN 6 THEN 'czerwiec'
+        WHEN 7 THEN 'lipiec'
+        WHEN 8 THEN 'sierpień'
+        WHEN 9 THEN 'wrzesień'
+        WHEN 10 THEN 'październik'
+        WHEN 11 THEN 'listopad'
+        WHEN 12 THEN 'grudzień'
+END AS nazwa_miesiaca,
+COUNT(*) AS liczba_projektow
 FROM projekty p
-GROUP BY miesiac
+GROUP BY EXTRACT(MONTH FROM p.projekt_data_rozpoczecia)
 ORDER BY liczba_projektow DESC;
 
 
 -- The most popular months to finish the project, ordered by the number of projects:
 
-SELECT EXTRACT(MONTH FROM p.projekt_data_zakonczenia) AS miesiac,
-	   COUNT(*) AS liczba_projektow
+SELECT 
+CASE EXTRACT(MONTH FROM p.projekt_data_zakonczenia)
+        WHEN 1 THEN 'styczeń'
+        WHEN 2 THEN 'luty'
+        WHEN 3 THEN 'marzec'
+        WHEN 4 THEN 'kwiecień'
+        WHEN 5 THEN 'maj'
+        WHEN 6 THEN 'czerwiec'
+        WHEN 7 THEN 'lipiec'
+        WHEN 8 THEN 'sierpień'
+        WHEN 9 THEN 'wrzesień'
+        WHEN 10 THEN 'październik'
+        WHEN 11 THEN 'listopad'
+        WHEN 12 THEN 'grudzień'
+END AS nazwa_miesiaca,
+COUNT(*) AS liczba_projektow
 FROM projekty p
-GROUP BY miesiac
+GROUP BY EXTRACT(MONTH FROM p.projekt_data_zakonczenia)
 ORDER BY liczba_projektow DESC;
 
 
@@ -55,6 +83,7 @@ LEFT JOIN projekty pr ON p.pakiet_id = pr.pakiet_id
 GROUP BY p.pakiet_nazwa, p.pakiet_kategoria 
 ORDER BY ilosc_projektow DESC
 LIMIT 2;
+
 
 
 
