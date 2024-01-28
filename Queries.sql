@@ -97,7 +97,7 @@ GROUP BY budzet, inwestor, miasto
 ORDER BY budzet DESC
 LIMIT 3;
 
--- or:
+-- or another option:
 
 WITH dane_o_projekcie AS 
 	(
