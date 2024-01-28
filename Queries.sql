@@ -65,7 +65,7 @@ GROUP BY EXTRACT(MONTH FROM p.projekt_data_zakonczenia)
 ORDER BY liczba_projektow DESC;
 
 
--- 3 most popular styles in the office: 
+-- Top 3 design styles in the office: 
 
 SELECT s.stylistyka_nazwa AS styl, COUNT(s.stylistyka_id) AS ilosc_projektow
 FROM stylistyka s 
@@ -75,7 +75,7 @@ ORDER BY ilosc_projektow DESC
 LIMIT 3;
 
 
--- Two best selling packages by quantity (package name, category and quantity):
+-- Top 2 selling packages by quantity (package name, category and quantity):
 
 SELECT p.pakiet_nazwa AS pakiet, p.pakiet_kategoria AS kategoria, COUNT(pr.pakiet_id) AS ilosc_projektow
 FROM pakiety p 
@@ -84,6 +84,34 @@ GROUP BY p.pakiet_nazwa, p.pakiet_kategoria
 ORDER BY ilosc_projektow DESC
 LIMIT 2;
 
+-- Top 3 projects with the largest planned budget (investor's full name and city when project is located):
 
+SELECT CONCAT(i.inwestor_imie, ' ', i.inwestor_nazwisko) AS inwestor, 
+	   p.projekt_budzet_planowany AS budzet,
+	   a.adres_miasto AS miasto
+FROM inwestorzy i 
+INNER JOIN projekty_inwestorzy prin ON i.inwestor_id =prin.inwestor_id 
+INNER JOIN projekty p ON prin.projekt_id = p.projekt_id 
+INNER JOIN adresy a ON p.adres_id = a.adres_id 
+GROUP BY budzet, inwestor, miasto 
+ORDER BY budzet DESC
+LIMIT 3;
 
+-- or:
+
+WITH dane_o_projekcie AS 
+	(
+    	SELECT CONCAT(i.inwestor_imie, ' ', i.inwestor_nazwisko) AS inwestor, 
+        	   p.projekt_budzet_planowany AS budzet,
+               a.adres_miasto AS miasto
+    	FROM inwestorzy i 
+    	INNER JOIN projekty_inwestorzy prin ON i.inwestor_id = prin.inwestor_id 
+    	INNER JOIN projekty p ON prin.projekt_id = p.projekt_id 
+    	INNER JOIN adresy a ON p.adres_id = a.adres_id 
+	)
+SELECT inwestor, budzet, miasto
+FROM dane_o_projekcie
+GROUP BY inwestor, budzet, miasto
+ORDER BY budzet DESC
+LIMIT 3;
 
