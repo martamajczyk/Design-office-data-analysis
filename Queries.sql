@@ -90,7 +90,7 @@ SELECT CONCAT(i.inwestor_imie, ' ', i.inwestor_nazwisko) AS inwestor,
 	   p.projekt_budzet_planowany AS budzet,
 	   a.adres_miasto AS miasto
 FROM inwestorzy i 
-INNER JOIN projekty_inwestorzy prin ON i.inwestor_id =prin.inwestor_id 
+INNER JOIN projekty_inwestorzy prin ON i.inwestor_id = prin.inwestor_id 
 INNER JOIN projekty p ON prin.projekt_id = p.projekt_id 
 INNER JOIN adresy a ON p.adres_id = a.adres_id 
 GROUP BY budzet, inwestor, miasto 
@@ -114,4 +114,56 @@ FROM dane_o_projekcie
 GROUP BY inwestor, budzet, miasto
 ORDER BY budzet DESC
 LIMIT 3;
+
+-- Investments in which the most projects were carried out, in descending order:
+
+SELECT COUNT(p.inwestycja_id) AS ilosc_projektow, i.inwestycja_nazwa 
+FROM projekty p
+INNER JOIN inwestycje i ON p.inwestycja_id = i.inwestycja_id 
+GROUP BY p.inwestycja_id, i.inwestycja_nazwa 
+ORDER BY ilosc_projektow DESC;
+
+
+-- The most popular ways to reach clients who bring the highest profits for the project in the descending order:
+
+SELECT i.inwestor_sposob_dotarcia AS sposob_dotarcia,
+       SUM(p.projekt_cena_umowa) AS najwiekszy_dochod
+FROM inwestorzy i
+INNER JOIN projekty_inwestorzy prin ON i.inwestor_id = prin.inwestor_id
+INNER JOIN projekty p ON p.projekt_id = prin.projekt_id 
+GROUP BY i.inwestor_sposob_dotarcia
+ORDER BY najwiekszy_dochod DESC;
+
+-- or another option:
+
+WITH najbardziej_dochodowi_inwestorzy AS
+	(		
+ 		SELECT SUM(p.projekt_cena_umowa) AS najwiekszy_dochod, i.inwestor_id
+ 		FROM inwestorzy i
+ 		INNER JOIN projekty_inwestorzy prin ON i.inwestor_id = prin.inwestor_id
+ 		INNER JOIN projekty p ON prin.projekt_id = p.projekt_id
+ 		GROUP BY i.inwestor_id
+	),
+	najpopularniejszy_sposob_dotarcia AS 
+	(
+		SELECT i.inwestor_id, i.inwestor_sposob_dotarcia, COUNT(*) AS liczba_inwestorow
+		FROM inwestorzy i
+		GROUP BY i.inwestor_id, i.inwestor_sposob_dotarcia
+	)
+SELECT npsd.inwestor_sposob_dotarcia AS sposob_dotarcia,
+       SUM(ndi.najwiekszy_dochod) AS suma_dochodow
+FROM najbardziej_dochodowi_inwestorzy ndi
+INNER JOIN najpopularniejszy_sposob_dotarcia npsd ON ndi.inwestor_id = npsd.inwestor_id
+GROUP BY npsd.inwestor_sposob_dotarcia
+ORDER BY suma_dochodow DESC;
+
+-- Average square footage of the apartment/house in private and investment projects (as two categories) and average price for the project in 2022:
+
+SELECT pk.pakiet_kategoria AS kategoria,
+       ROUND(AVG(p.projekt_metraz), 2) AS metraz, 
+       ROUND(AVG(p.projekt_cena_umowa),2) AS cena
+FROM projekty p 
+INNER JOIN pakiety pk ON p.pakiet_id = pk.pakiet_id 
+WHERE pk.pakiet_kategoria IN ('inwestycyjny', 'prywatny') AND EXTRACT(YEAR FROM p.projekt_data_umowa) = 2022
+GROUP BY pk.pakiet_kategoria;
 
